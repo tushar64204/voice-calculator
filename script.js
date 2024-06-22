@@ -10,30 +10,14 @@ navigator.mediaDevices.getUserMedia({ audio: true })
     // Create the speech recognition object
     const speechRecognition = new webkitSpeechRecognition();
 
-    // Set the speech recognition language and max results
+    // Set the speech recognition language
     speechRecognition.lang = 'en-US';
-    speechRecognition.maxResults = 10;
 
     // Set the speech recognition event listeners
     speechRecognition.onresult = event => {
       const transcript = event.results[0][0].transcript;
       inputField.value = transcript;
     };
-
-    speechRecognition.onend = () => {
-      speechRecognition.start();
-    };
-
-    speechRecognition.onerror = event => {
-      console.error('Speech recognition error:', event.error);
-    };
-
-    speechRecognition.onnomatch = event => {
-      console.error('Speech recognition no match:', event);
-    };
-
-    // Start the speech recognition
-    speechRecognition.start();
 
     // Add an event listener to the speak button
     speakButton.addEventListener('click', () => {
@@ -44,8 +28,13 @@ navigator.mediaDevices.getUserMedia({ audio: true })
     calculateButton.addEventListener('click', () => {
       const input = inputField.value;
       try {
-        const result = eval(input);
-        resultParagraph.textContent = `Result: ${result}`;
+        // Sanitize the input to allow only numbers and basic operators
+        if (/^[0-9+\-*/().\s]+$/.test(input)) {
+          const result = eval(input);
+          resultParagraph.textContent = `Result: ${result}`;
+        } else {
+          throw new Error('Invalid input');
+        }
       } catch (error) {
         resultParagraph.textContent = `Error: ${error.message}`;
       }
